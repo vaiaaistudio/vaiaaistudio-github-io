@@ -1,76 +1,64 @@
-# VAIA AI STUDIO - Secure Pollinations Generator
+# VAIA AI STUDIO - Vercel Fixed Secure Proxy v3
 
-Generator gambar AI modern, responsif, dan aman untuk deploy ke GitHub + Vercel.
+Versi ini memperbaiki kasus halaman web tampil, tetapi backend proxy `/api/health` tidak aktif.
 
-## Yang sudah diamankan
+## Struktur wajib di ROOT repository
 
-- API key **tidak ada** di `index.html`.
-- Tidak ada input API key di halaman web.
-- Tidak ada API key di `localStorage`.
-- Frontend hanya memanggil:
-  - `/api/generate`
-  - `/api/enhance`
-  - `/api/models`
-  - `/api/health`
-- Secret key Pollinations dibaca dari Environment Variable server:
-  - `POLLINATIONS_API_KEY`
-
-## Struktur file
+Pastikan file/folder ini ada langsung di root repository GitHub, bukan masuk folder ganda.
 
 ```text
-.
-├── index.html
-├── api
-│   ├── generate.js
-│   ├── enhance.js
-│   ├── models.js
-│   └── health.js
-├── package.json
-├── .env.example
-├── .gitignore
-└── README_DEPLOY.md
+index.html
+vercel.json
+package.json
+.env.example
+.gitignore
+api/
+  health.js
+  generate.js
+  enhance.js
+  models.js
 ```
 
-## Cara deploy ke GitHub + Vercel
-
-1. Upload semua file ini ke repository GitHub.
-2. Login ke Vercel.
-3. Import repository GitHub.
-4. Buka Project Settings di Vercel.
-5. Masuk ke **Environment Variables**.
-6. Tambahkan variable:
-
-```bash
-POLLINATIONS_API_KEY=isi_secret_key_pollinations_di_sini
-```
-
-7. Redeploy project.
-
-## Test lokal dengan Vercel CLI
-
-```bash
-npm install -g vercel
-cp .env.example .env
-```
-
-Isi `.env` lokal:
-
-```bash
-POLLINATIONS_API_KEY=isi_secret_key_pollinations_di_sini
-```
-
-Jalankan:
-
-```bash
-vercel dev
-```
-
-Buka browser:
+Kalau folder `api/` tidak ikut ter-upload, halaman akan menampilkan:
 
 ```text
-http://localhost:3000
+Backend proxy belum aktif
 ```
 
-## Catatan penting
+## Environment Variable di Vercel
 
-Karena secret key pernah ditampilkan di frontend versi lama, sebaiknya buat key baru atau rotate key lama di Pollinations sebelum dipakai untuk production.
+Di Vercel → Project Settings → Environment Variables, isi:
+
+```env
+Key   = POLLINATIONS_API_KEY
+Value = secret key Pollinations Anda
+```
+
+Centang atau pilih environment yang dipakai, minimal Production. Setelah disimpan, lakukan Redeploy.
+
+## Cara cek sukses
+
+Buka URL ini setelah deploy selesai:
+
+```text
+https://domain-vercel-anda.vercel.app/api/health
+```
+
+Hasil yang benar:
+
+```json
+{
+  "ok": true,
+  "ready": true,
+  "runtime": "vercel-node"
+}
+```
+
+Jika yang muncul adalah halaman HTML VAIA, berarti route `/api` tidak aktif, biasanya karena deploy masih ke GitHub Pages/static hosting, folder `api` tidak masuk root repo, atau Vercel belum redeploy dari commit terbaru.
+
+## Catatan teknis
+
+- Frontend tidak menyimpan API key.
+- Backend memakai `Authorization: Bearer` ke Pollinations.
+- Generate mencoba endpoint GET `/image/{prompt}` terlebih dulu agar seed tetap didukung, lalu fallback ke endpoint OpenAI-compatible `/v1/images/generations`.
+- Ukuran gambar dibatasi maksimal 2048 px per sisi agar tidak terlalu berat di serverless function.
