@@ -1,0 +1,21 @@
+{
+  "name": "vaia-ai-studio-secure-pollinations-generator",
+  "version": "2.0.0",
+  "private": true,
+  "description": "VAIA AI STUDIO secure text-to-image generator using Pollinations API through Vercel backend proxy.",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "vaia",
+    "pollinations",
+    "text-to-image",
+    "vercel",
+    "proxy"
+  ],
+  "license": "UNLICENSED"
+}
